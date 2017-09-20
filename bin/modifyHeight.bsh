@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Modify the antenna height (ARP) of the rover 
+
+R CMD BATCH ~/GPS/bin/FileHeight.r
+
+
+for Z in `cat FileHeight.csv`; do
+
+	echo $Z > MT.txt
+	# The file name is in the first column
+	
+	ht=`awk -F "\"*,\"*" '{print $2}' MT.txt`
+	fn1=`awk -F "\"*,\"*" '{print $1}' MT.txt`
+	
+	fn2=${fn1%.*}'_2'	
+	teqc -O.pe $ht 0 0 $fn1 > $fn2
+	mv $fn2 $fn1
+
+done
+
+

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+## Post processing differential gps using RTKLIB's program 
+## rnx2rtkp. Use '$ rnx2rtkp -?' in a terminal for help and option arguments 
+##
+## The usage for this will be 
+##	$ rnx2rtkp 
+##
+## The 
+
+R=.RESULTS.txt
+D=RESULTS 
+
+if [ -d "$D" ]; then
+	rm -rf $D
+fi 
+
+mkdir $D 
+
+
+# A csv file was created called RoverBaseNav.csv which has in each column 
+# the rover file to be used, the base file to be used and the corresponding
+# base nav file. There is a TEMP directory created that has all the rover 
+# and base files in it. 
+
+for OBS in `ls *o`; do
+
+	fn=${OBS%.*}
+	nav=${OBS%o*}'n'
+
+	rnx2rtkp -p 0 $OBS $nav > $fn$R
+	mv $fn$R $D
+
+done

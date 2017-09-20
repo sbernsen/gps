@@ -1,0 +1,34 @@
+#!/bin/bash
+
+### getRINEXmeta.bsh ###
+## Get metadata from all RINEX files in a folder and store them in a table. To
+## run the script you need to enter in the terminal
+##
+## > bash getRINEXmeta.bsh YY 
+##
+## Input Arguments:
+## YY - the last two digits of the year. The variable can be called using $1
+
+
+## Define necessary paths 
+funPath="~/GPS"
+
+# Define terms
+mf=meta.txt
+metatable=MetaTable.csv
+
+# Create the file for the meta data table. This will be a delimited text file
+headers="Filename, Start_Time, End_Time, Antenna_Height, Start_Epoch, End_Epoch" 
+> $metatable
+echo $headers > $metatable 
+
+## Loop through each file and write a meta data text file 
+for fn in *.$1o
+do
+	
+	echo $fn
+	teqc +meta $fn > $mf 
+	R CMD BATCH ~/GPS/bin/appendMeta.r 
+	
+
+done

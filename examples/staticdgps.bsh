@@ -1,0 +1,78 @@
+#!/bin/bash
+
+
+## Define the file and folder paths
+# set the working directory for the R scripts 
+P=`pwd`
+echo $P > ~/parentDirectory.txt
+
+B=BASE
+R=ROVER 
+T=TEMP
+RES=RESULTS 
+
+metaFn=MetaTable.csv
+
+TBHOME=~/GPS/bin
+
+cd $B
+bash $TBHOME/getRINEXmeta.bsh 17
+
+
+
+cd ../$R
+bash $TBHOME/getRINEXmeta.bsh 17
+
+#### At this point, the heights for the rover and base station need to be edited 
+#### in their respective MetaTable.csv file
+
+cd ..
+R CMD BATCH $TBHOME/compareBaseRover.r 
+
+cd $B
+R CMD BATCH $TBHOME/editAntennaHeightTable.r &&
+bash $TBHOME/modifyHeight.bsh
+
+cd ../$R
+R CMD BATCH $TBHOME/editAntennaHeightTable.r &&
+bash $TBHOME/modifyHeight.bsh
+
+
+if [ -d "$T" ]; then
+	rm -rf $T 
+fi
+
+mkdir -v $T
+ 
+cp ./*n $T
+cp ./*o $T 
+ 
+cp ../$B/*n $T 
+cp ../$B/*o $T
+ 
+
+mv ../RoverBaseNav.csv $T
+
+cd $T
+
+bash $TBHOME/dgpsProcess.bsh 
+
+
+## Move the data the results to a separate folder.
+
+mkdir -v $RES 
+
+
+mv $RES ../../ 
+cd ../
+rm -rf $T
+
+cd ../$RES
+ 
+## Each file produces a set of results. Take the last result for each location,
+## which is the final result, and compile it into one spreadhseet/csv. The name
+## of the csv will be saved as 'ResultsEdit.csv' but there is also the 
+## 'ResultsRaw.csv' which contains all of the analysis data. I'm not exactly 
+## sure what all of it means yet. 
+R CMD BATCH $TBHOME/RawResults2Spreadsheet.r
+
